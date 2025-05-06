@@ -1,3 +1,4 @@
+require("hardhat-deploy");
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
@@ -11,16 +12,26 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
+      blockConfirmations: 1,
     },
     sepolia: {
       url: SEPOLIA_RPC_URL,
       accounts: [PRIVATE_KEY],
-      chainId: 11155111
+      chainId: 11155111,
+      blockConfirmations: 6,
     }
   },
   etherscan: {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY
     }
-  }
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
+    player: {
+      default: 1, 
+    }
+  },
 };

@@ -1,5 +1,6 @@
 // 部署脚本 - 用于部署LotteryContract合约
 const hre = require("hardhat");
+const CONTRACT_NAME = "RandomNumberConsumerV2_5"
 
 async function main() {
   // 获取网络配置
@@ -25,23 +26,23 @@ async function main() {
     console.log(`使用本地开发网络的模拟订阅ID: ${subscriptionId}`);
   }
 
-  // 部署LotteryContract合约
-  console.log("开始部署LotteryContract合约...");
+  // 部署合约
+  console.log("开始部署合约...");
   const vrfCoordinator = process.env.SEPOLIA_VRF_COORDINATOR;
   const keyHash = process.env.SEPOLIA_KEY_HASH;
 
-  const LotteryContract = await hre.ethers.getContractFactory("LotteryContract");
-  const lotteryContract = await LotteryContract.deploy(subscriptionId, vrfCoordinator, keyHash);
+  const contractFactory = await hre.ethers.getContractFactory(CONTRACT_NAME);
+  const contract = await contractFactory.deploy(subscriptionId, vrfCoordinator, keyHash);
 
-  await lotteryContract.waitForDeployment();
+  await contract.waitForDeployment();
   
-  const address = await lotteryContract.getAddress();
-  console.log(`LotteryContract已部署到地址: ${address}`);
+  const address = await contract.getAddress();
+  console.log(`Contract已部署到地址: ${address}`);
 
   // 等待几个区块确认以确保合约已正确部署
   console.log("等待区块确认...");
   if (network !== "hardhat" && network !== "localhost") {
-    await lotteryContract.deploymentTransaction().wait(5);
+    await contract.deploymentTransaction().wait(5);
     console.log("合约部署已确认");
     
     // 验证合约（如果不是本地网络）
@@ -49,7 +50,7 @@ async function main() {
     try {
       await hre.run("verify:verify", {
         address: address,
-        constructorArguments: [subscriptionId],
+        constructorArguments: [subscriptionId, vrfCoordinator, keyHash],
       });
       console.log("合约验证成功");
     } catch (error) {
